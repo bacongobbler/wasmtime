@@ -237,13 +237,12 @@ impl<T: WasiHttpView> WasiHttpView for WasiHttpImpl<T> {
 
 /// Returns `true` when the header is forbidden according to this [`WasiHttpView`] implementation.
 pub(crate) fn is_forbidden_header(view: &mut dyn WasiHttpView, name: &HeaderName) -> bool {
-    static FORBIDDEN_HEADERS: [HeaderName; 10] = [
+    static FORBIDDEN_HEADERS: [HeaderName; 9] = [
         hyper::header::CONNECTION,
         HeaderName::from_static("keep-alive"),
         hyper::header::PROXY_AUTHENTICATE,
         hyper::header::PROXY_AUTHORIZATION,
         HeaderName::from_static("proxy-connection"),
-        hyper::header::TE,
         hyper::header::TRANSFER_ENCODING,
         hyper::header::UPGRADE,
         hyper::header::HOST,
@@ -251,6 +250,7 @@ pub(crate) fn is_forbidden_header(view: &mut dyn WasiHttpView, name: &HeaderName
     ];
 
     FORBIDDEN_HEADERS.contains(name) || view.is_forbidden_header(name)
+
 }
 
 /// Removes forbidden headers from a [`hyper::HeaderMap`].
