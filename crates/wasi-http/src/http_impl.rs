@@ -11,6 +11,7 @@ use crate::{
     WasiHttpImpl, WasiHttpView,
 };
 use bytes::Bytes;
+use http::Version;
 use http_body_util::{BodyExt, Empty};
 use hyper::Method;
 use wasmtime::component::Resource;
@@ -89,9 +90,14 @@ where
                 .boxed()
         });
 
-        let request = builder
+        let mut request = builder
             .body(body)
             .map_err(|err| internal_error(err.to_string()))?;
+
+        if request.headers().get_all("TE").iter().any(|v| v == "trailers")
+        {
+            *request.version_mut() = Version::HTTP_2;
+        }
 
         let future = self.send_request(
             request,
