@@ -99,6 +99,8 @@ where
             *request.version_mut() = Version::HTTP_2;
         }
 
+        println!("Sending request as {:?}", request.version());
+
         let future = self.send_request(
             request,
             OutgoingRequestConfig {

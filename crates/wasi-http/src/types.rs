@@ -373,9 +373,10 @@ pub async fn default_send_request_handler(
             })?;
             let stream = TokioIo::new(stream);
 
+            let executor = hyper_util::rt::tokio::TokioExecutor::new();
             let (sender, conn) = timeout(
                 connect_timeout,
-                hyper::client::conn::http1::handshake(stream),
+                hyper::client::conn::http2::handshake(executor, stream),
             )
             .await
             .map_err(|_| types::ErrorCode::ConnectionTimeout)?
@@ -393,11 +394,12 @@ pub async fn default_send_request_handler(
             (sender, worker)
         }
     } else {
+        let executor = hyper_util::rt::tokio::TokioExecutor::new();
         let tcp_stream = TokioIo::new(tcp_stream);
         let (sender, conn) = timeout(
             connect_timeout,
             // TODO: we should plumb the builder through the http context, and use it here
-            hyper::client::conn::http1::handshake(tcp_stream),
+            hyper::client::conn::http2::handshake(executor, tcp_stream),
         )
         .await
         .map_err(|_| types::ErrorCode::ConnectionTimeout)?
